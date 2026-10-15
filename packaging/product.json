@@ -1,0 +1,17 @@
+{
+  "name": "Maxwell's Demon Detector",
+  "edition": "Community",
+  "binary": "mdd",
+  "folder": "MaxwellsDemonDetector",
+  "crate_dir": "v0.3.0/maxwells-demon-detector",
+  "url": "https://github.com/whisprer-specops/maxwells-demon-detector",
+  "download_page": "https://github.com/whisprer-specops/maxwells-demon-detector/releases/latest",
+  "docs": [
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "check_unix": "scripts/check.sh",
+  "check_windows": "scripts/check.ps1",
+  "repository": "https://github.com/whisprer-specops/maxwells-demon-detector"
+}
