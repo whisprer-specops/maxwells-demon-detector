@@ -4,7 +4,7 @@
 
 whispr.dev holds the copyright in Maxwell's Demon Detector. Before starting work on a change you would like merged, open an issue so the terms for your contribution can be agreed first. Bug reports need no agreement: see the end of this file.
 
-Every code file opens with these two lines, as comments in its own language, after any `#!` line. `v0.3.0/maxwells-demon-detector/tests/notice_contracts.rs` fails a file without them.
+Every code file opens with these two lines, as comments in its own language, after any `#!` line. `crate/tests/notice_contracts.rs` fails a file without them.
 
 ```text
 Copyright (C) 2026 whispr.dev
@@ -13,9 +13,9 @@ SPDX-License-Identifier: GPL-3.0-only
 
 ## Building and checking
 
-Work in `v0.3.0/maxwells-demon-detector/`. Use Rust 1.97.0, as pinned in `rust-toolchain.toml` (rustup installs it on the first build). The code keeps to Rust 1.87, the declared minimum in `Cargo.toml`.
+Work in `crate/`. Use Rust 1.97.0, as pinned in `rust-toolchain.toml` (rustup installs it on the first build). The code keeps to Rust 1.87, the declared minimum in `Cargo.toml`.
 
-On Windows, `powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1` runs every check: formatting, the tests, strict lints (`clippy -D warnings`), a release build and the headless demo. `bash scripts/check.sh` does the same elsewhere. A change to live capture should also pass `cargo clippy --all-targets --features live -- -D warnings`, which needs the Npcap SDK or `libpcap-dev`.
+On Windows, `powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1` runs every check: formatting, the tests, strict lints (`clippy -D warnings`), a release build and the headless demo. `bash scripts/check.sh` does the same elsewhere. Live capture is always compiled, so these checks cover it. A change to `src/capture/` should also be tried for real: `sudo ./target/release/mdd --mode live-pcap` on Linux, both with libpcap and with `MDD_CAPTURE=builtin`.
 
 ## Rules for changes
 

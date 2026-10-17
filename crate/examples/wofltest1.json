@@ -1,0 +1,624 @@
+[
+  {
+    "_index": "packets-2026-10-16",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.section_number": "1",
+          "frame.interface_id": "0",
+          "frame.interface_id_tree": {
+            "frame.interface_name": "\\Device\\NPF_{2FFE4896-793D-46C8-84A1-38E69D43331B}",
+            "frame.interface_description": "vEthernet (WSL (Hyper-V firewall))"
+          },
+          "frame.encap_type": "1",
+          "frame.time": "2026-10-16T15:42:44.351116700Z",
+          "frame.time_utc": "2026-10-16T15:42:44.351116700Z",
+          "frame.time_epoch": "2026-10-16T15:42:44.351116700Z",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_relative": "0.000000000",
+          "frame.number": "1",
+          "frame.len": "119",
+          "frame.cap_len": "119",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "eth:ethertype:ip:udp:db-lsp-disc:json",
+          "frame.encoding": "0",
+          "frame.coloring_rule.name": "UDP",
+          "frame.coloring_rule.string": "udp"
+        },
+        "eth": {
+          "eth.dst": "ff:ff:ff:ff:ff:ff",
+          "eth.dst_tree": {
+            "eth.dst_resolved": "Broadcast",
+            "eth.dst.oui": "16777215",
+            "eth.dst.lg": "1",
+            "eth.dst.ig": "1",
+            "eth.addr": "ff:ff:ff:ff:ff:ff",
+            "eth.addr_resolved": "Broadcast",
+            "eth.addr.oui": "16777215",
+            "eth.lg": "1",
+            "eth.ig": "1"
+          },
+          "eth.src": "00:15:5d:bd:8d:f8",
+          "eth.src_tree": {
+            "eth.src_resolved": "Microsoft_bd:8d:f8",
+            "eth.src.oui": "5469",
+            "eth.src.oui_resolved": "Microsoft Corporation",
+            "eth.src.lg": "0",
+            "eth.src.ig": "0",
+            "eth.addr": "00:15:5d:bd:8d:f8",
+            "eth.addr_resolved": "Microsoft_bd:8d:f8",
+            "eth.addr.oui": "5469",
+            "eth.addr.oui_resolved": "Microsoft Corporation",
+            "eth.lg": "0",
+            "eth.ig": "0"
+          },
+          "eth.type": "0x0800",
+          "eth.stream": "0"
+        },
+        "ip": {
+          "ip.version": "4",
+          "ip.hdr_len": "20",
+          "ip.dsfield": "0x00",
+          "ip.dsfield_tree": {
+            "ip.dsfield.dscp": "0",
+            "ip.dsfield.ecn": "0"
+          },
+          "ip.len": "105",
+          "ip.id": "0xe14a",
+          "ip.flags": "0x00",
+          "ip.flags_tree": {
+            "ip.flags.rb": "0",
+            "ip.flags.df": "0",
+            "ip.flags.mf": "0"
+          },
+          "ip.frag_offset": "0",
+          "ip.ttl": "128",
+          "ip.proto": "17",
+          "ip.checksum": "0x0000",
+          "ip.checksum.status": "2",
+          "ip.src": "172.30.128.1",
+          "ip.addr": "172.30.128.1",
+          "ip.src_host": "172.30.128.1",
+          "ip.host": "172.30.128.1",
+          "ip.dst": "172.30.143.255",
+          "ip.addr": "172.30.143.255",
+          "ip.dst_host": "172.30.143.255",
+          "ip.host": "172.30.143.255",
+          "ip.stream": "0"
+        },
+        "udp": {
+          "udp.srcport": "17500",
+          "udp.dstport": "17500",
+          "udp.port": "17500",
+          "udp.port": "17500",
+          "udp.length": "85",
+          "udp.checksum": "0x4262",
+          "udp.checksum.status": "2",
+          "udp.stream": "0",
+          "udp.stream.pnum": "1",
+          "Timestamps": {
+            "udp.time_relative": "0.000000000",
+            "udp.time_delta": "0.000000000"
+          },
+          "udp.payload": "7b:22:76:65:72:73:69:6f:6e:22:3a:5b:32:2c:30:5d:2c:22:70:6f:72:74:22:3a:31:37:35:30:30:2c:22:68:6f:73:74:5f:69:6e:74:22:3a:32:30:32:32:38:38:31:38:33:33:39:2c:22:6e:61:6d:65:73:70:61:63:65:73:22:3a:5b:37:32:34:31:34:32:38:35:5d:7d"
+        },
+        "db-lsp-disc": {
+          "json": {
+            "json.object": "{\"version\":[2,0],\"port\":17500,\"host_int\":20228818339,\"namespaces\":[72414285]}",
+            "json.object_tree": {
+              "json.member": "version",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/version/[]:2",
+                  "json.member_with_value": "[]:2",
+                  "json.value.number": "2",
+                  "json.path_with_value": "/version/[]:0",
+                  "json.member_with_value": "[]:0",
+                  "json.value.number": "0"
+                },
+                "json.key": "version",
+                "json.path": "/version"
+              },
+              "json.member": "port",
+              "json.member_tree": {
+                "json.path_with_value": "/port:17500",
+                "json.member_with_value": "port:17500",
+                "json.value.number": "17500",
+                "json.key": "port",
+                "json.path": "/port"
+              },
+              "json.member": "host_int",
+              "json.member_tree": {
+                "json.path_with_value": "/host_int:20228818339",
+                "json.member_with_value": "host_int:20228818339",
+                "json.value.number": "20228818339",
+                "json.key": "host_int",
+                "json.path": "/host_int"
+              },
+              "json.member": "namespaces",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/namespaces/[]:72414285",
+                  "json.member_with_value": "[]:72414285",
+                  "json.value.number": "72414285"
+                },
+                "json.key": "namespaces",
+                "json.path": "/namespaces"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": "packets-2026-10-16",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.section_number": "1",
+          "frame.interface_id": "0",
+          "frame.interface_id_tree": {
+            "frame.interface_name": "\\Device\\NPF_{2FFE4896-793D-46C8-84A1-38E69D43331B}",
+            "frame.interface_description": "vEthernet (WSL (Hyper-V firewall))"
+          },
+          "frame.encap_type": "1",
+          "frame.time": "2026-10-16T15:43:20.574547800Z",
+          "frame.time_utc": "2026-10-16T15:43:20.574547800Z",
+          "frame.time_epoch": "2026-10-16T15:43:20.574547800Z",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "36.223431100",
+          "frame.time_delta_displayed": "36.223431100",
+          "frame.time_relative": "36.223431100",
+          "frame.number": "2",
+          "frame.len": "119",
+          "frame.cap_len": "119",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "eth:ethertype:ip:udp:db-lsp-disc:json",
+          "frame.encoding": "0",
+          "frame.coloring_rule.name": "UDP",
+          "frame.coloring_rule.string": "udp"
+        },
+        "eth": {
+          "eth.dst": "ff:ff:ff:ff:ff:ff",
+          "eth.dst_tree": {
+            "eth.dst_resolved": "Broadcast",
+            "eth.dst.oui": "16777215",
+            "eth.dst.lg": "1",
+            "eth.dst.ig": "1",
+            "eth.addr": "ff:ff:ff:ff:ff:ff",
+            "eth.addr_resolved": "Broadcast",
+            "eth.addr.oui": "16777215",
+            "eth.lg": "1",
+            "eth.ig": "1"
+          },
+          "eth.src": "00:15:5d:bd:8d:f8",
+          "eth.src_tree": {
+            "eth.src_resolved": "Microsoft_bd:8d:f8",
+            "eth.src.oui": "5469",
+            "eth.src.oui_resolved": "Microsoft Corporation",
+            "eth.src.lg": "0",
+            "eth.src.ig": "0",
+            "eth.addr": "00:15:5d:bd:8d:f8",
+            "eth.addr_resolved": "Microsoft_bd:8d:f8",
+            "eth.addr.oui": "5469",
+            "eth.addr.oui_resolved": "Microsoft Corporation",
+            "eth.lg": "0",
+            "eth.ig": "0"
+          },
+          "eth.type": "0x0800",
+          "eth.stream": "0"
+        },
+        "ip": {
+          "ip.version": "4",
+          "ip.hdr_len": "20",
+          "ip.dsfield": "0x00",
+          "ip.dsfield_tree": {
+            "ip.dsfield.dscp": "0",
+            "ip.dsfield.ecn": "0"
+          },
+          "ip.len": "105",
+          "ip.id": "0xe14b",
+          "ip.flags": "0x00",
+          "ip.flags_tree": {
+            "ip.flags.rb": "0",
+            "ip.flags.df": "0",
+            "ip.flags.mf": "0"
+          },
+          "ip.frag_offset": "0",
+          "ip.ttl": "128",
+          "ip.proto": "17",
+          "ip.checksum": "0x0000",
+          "ip.checksum.status": "2",
+          "ip.src": "172.30.128.1",
+          "ip.addr": "172.30.128.1",
+          "ip.src_host": "172.30.128.1",
+          "ip.host": "172.30.128.1",
+          "ip.dst": "172.30.143.255",
+          "ip.addr": "172.30.143.255",
+          "ip.dst_host": "172.30.143.255",
+          "ip.host": "172.30.143.255",
+          "ip.stream": "0"
+        },
+        "udp": {
+          "udp.srcport": "17500",
+          "udp.dstport": "17500",
+          "udp.port": "17500",
+          "udp.port": "17500",
+          "udp.length": "85",
+          "udp.checksum": "0x4262",
+          "udp.checksum.status": "2",
+          "udp.stream": "0",
+          "udp.stream.pnum": "2",
+          "Timestamps": {
+            "udp.time_relative": "36.223431100",
+            "udp.time_delta": "36.223431100"
+          },
+          "udp.payload": "7b:22:76:65:72:73:69:6f:6e:22:3a:5b:32:2c:30:5d:2c:22:70:6f:72:74:22:3a:31:37:35:30:30:2c:22:68:6f:73:74:5f:69:6e:74:22:3a:32:30:32:32:38:38:31:38:33:33:39:2c:22:6e:61:6d:65:73:70:61:63:65:73:22:3a:5b:37:32:34:31:34:32:38:35:5d:7d"
+        },
+        "db-lsp-disc": {
+          "json": {
+            "json.object": "{\"version\":[2,0],\"port\":17500,\"host_int\":20228818339,\"namespaces\":[72414285]}",
+            "json.object_tree": {
+              "json.member": "version",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/version/[]:2",
+                  "json.member_with_value": "[]:2",
+                  "json.value.number": "2",
+                  "json.path_with_value": "/version/[]:0",
+                  "json.member_with_value": "[]:0",
+                  "json.value.number": "0"
+                },
+                "json.key": "version",
+                "json.path": "/version"
+              },
+              "json.member": "port",
+              "json.member_tree": {
+                "json.path_with_value": "/port:17500",
+                "json.member_with_value": "port:17500",
+                "json.value.number": "17500",
+                "json.key": "port",
+                "json.path": "/port"
+              },
+              "json.member": "host_int",
+              "json.member_tree": {
+                "json.path_with_value": "/host_int:20228818339",
+                "json.member_with_value": "host_int:20228818339",
+                "json.value.number": "20228818339",
+                "json.key": "host_int",
+                "json.path": "/host_int"
+              },
+              "json.member": "namespaces",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/namespaces/[]:72414285",
+                  "json.member_with_value": "[]:72414285",
+                  "json.value.number": "72414285"
+                },
+                "json.key": "namespaces",
+                "json.path": "/namespaces"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": "packets-2026-10-16",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.section_number": "1",
+          "frame.interface_id": "0",
+          "frame.interface_id_tree": {
+            "frame.interface_name": "\\Device\\NPF_{2FFE4896-793D-46C8-84A1-38E69D43331B}",
+            "frame.interface_description": "vEthernet (WSL (Hyper-V firewall))"
+          },
+          "frame.encap_type": "1",
+          "frame.time": "2026-10-16T15:43:56.824655600Z",
+          "frame.time_utc": "2026-10-16T15:43:56.824655600Z",
+          "frame.time_epoch": "2026-10-16T15:43:56.824655600Z",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "36.250107800",
+          "frame.time_delta_displayed": "36.250107800",
+          "frame.time_relative": "72.473538900",
+          "frame.number": "3",
+          "frame.len": "119",
+          "frame.cap_len": "119",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "eth:ethertype:ip:udp:db-lsp-disc:json",
+          "frame.encoding": "0",
+          "frame.coloring_rule.name": "UDP",
+          "frame.coloring_rule.string": "udp"
+        },
+        "eth": {
+          "eth.dst": "ff:ff:ff:ff:ff:ff",
+          "eth.dst_tree": {
+            "eth.dst_resolved": "Broadcast",
+            "eth.dst.oui": "16777215",
+            "eth.dst.lg": "1",
+            "eth.dst.ig": "1",
+            "eth.addr": "ff:ff:ff:ff:ff:ff",
+            "eth.addr_resolved": "Broadcast",
+            "eth.addr.oui": "16777215",
+            "eth.lg": "1",
+            "eth.ig": "1"
+          },
+          "eth.src": "00:15:5d:bd:8d:f8",
+          "eth.src_tree": {
+            "eth.src_resolved": "Microsoft_bd:8d:f8",
+            "eth.src.oui": "5469",
+            "eth.src.oui_resolved": "Microsoft Corporation",
+            "eth.src.lg": "0",
+            "eth.src.ig": "0",
+            "eth.addr": "00:15:5d:bd:8d:f8",
+            "eth.addr_resolved": "Microsoft_bd:8d:f8",
+            "eth.addr.oui": "5469",
+            "eth.addr.oui_resolved": "Microsoft Corporation",
+            "eth.lg": "0",
+            "eth.ig": "0"
+          },
+          "eth.type": "0x0800",
+          "eth.stream": "0"
+        },
+        "ip": {
+          "ip.version": "4",
+          "ip.hdr_len": "20",
+          "ip.dsfield": "0x00",
+          "ip.dsfield_tree": {
+            "ip.dsfield.dscp": "0",
+            "ip.dsfield.ecn": "0"
+          },
+          "ip.len": "105",
+          "ip.id": "0xe14c",
+          "ip.flags": "0x00",
+          "ip.flags_tree": {
+            "ip.flags.rb": "0",
+            "ip.flags.df": "0",
+            "ip.flags.mf": "0"
+          },
+          "ip.frag_offset": "0",
+          "ip.ttl": "128",
+          "ip.proto": "17",
+          "ip.checksum": "0x0000",
+          "ip.checksum.status": "2",
+          "ip.src": "172.30.128.1",
+          "ip.addr": "172.30.128.1",
+          "ip.src_host": "172.30.128.1",
+          "ip.host": "172.30.128.1",
+          "ip.dst": "172.30.143.255",
+          "ip.addr": "172.30.143.255",
+          "ip.dst_host": "172.30.143.255",
+          "ip.host": "172.30.143.255",
+          "ip.stream": "0"
+        },
+        "udp": {
+          "udp.srcport": "17500",
+          "udp.dstport": "17500",
+          "udp.port": "17500",
+          "udp.port": "17500",
+          "udp.length": "85",
+          "udp.checksum": "0x4262",
+          "udp.checksum.status": "2",
+          "udp.stream": "0",
+          "udp.stream.pnum": "3",
+          "Timestamps": {
+            "udp.time_relative": "72.473538900",
+            "udp.time_delta": "36.250107800"
+          },
+          "udp.payload": "7b:22:76:65:72:73:69:6f:6e:22:3a:5b:32:2c:30:5d:2c:22:70:6f:72:74:22:3a:31:37:35:30:30:2c:22:68:6f:73:74:5f:69:6e:74:22:3a:32:30:32:32:38:38:31:38:33:33:39:2c:22:6e:61:6d:65:73:70:61:63:65:73:22:3a:5b:37:32:34:31:34:32:38:35:5d:7d"
+        },
+        "db-lsp-disc": {
+          "json": {
+            "json.object": "{\"version\":[2,0],\"port\":17500,\"host_int\":20228818339,\"namespaces\":[72414285]}",
+            "json.object_tree": {
+              "json.member": "version",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/version/[]:2",
+                  "json.member_with_value": "[]:2",
+                  "json.value.number": "2",
+                  "json.path_with_value": "/version/[]:0",
+                  "json.member_with_value": "[]:0",
+                  "json.value.number": "0"
+                },
+                "json.key": "version",
+                "json.path": "/version"
+              },
+              "json.member": "port",
+              "json.member_tree": {
+                "json.path_with_value": "/port:17500",
+                "json.member_with_value": "port:17500",
+                "json.value.number": "17500",
+                "json.key": "port",
+                "json.path": "/port"
+              },
+              "json.member": "host_int",
+              "json.member_tree": {
+                "json.path_with_value": "/host_int:20228818339",
+                "json.member_with_value": "host_int:20228818339",
+                "json.value.number": "20228818339",
+                "json.key": "host_int",
+                "json.path": "/host_int"
+              },
+              "json.member": "namespaces",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/namespaces/[]:72414285",
+                  "json.member_with_value": "[]:72414285",
+                  "json.value.number": "72414285"
+                },
+                "json.key": "namespaces",
+                "json.path": "/namespaces"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": "packets-2026-10-16",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.section_number": "1",
+          "frame.interface_id": "0",
+          "frame.interface_id_tree": {
+            "frame.interface_name": "\\Device\\NPF_{2FFE4896-793D-46C8-84A1-38E69D43331B}",
+            "frame.interface_description": "vEthernet (WSL (Hyper-V firewall))"
+          },
+          "frame.encap_type": "1",
+          "frame.time": "2026-10-16T15:44:33.074013200Z",
+          "frame.time_utc": "2026-10-16T15:44:33.074013200Z",
+          "frame.time_epoch": "2026-10-16T15:44:33.074013200Z",
+          "frame.offset_shift": "0.000000000",
+          "frame.time_delta": "36.249357600",
+          "frame.time_delta_displayed": "36.249357600",
+          "frame.time_relative": "108.722896500",
+          "frame.number": "4",
+          "frame.len": "119",
+          "frame.cap_len": "119",
+          "frame.marked": "0",
+          "frame.ignored": "0",
+          "frame.protocols": "eth:ethertype:ip:udp:db-lsp-disc:json",
+          "frame.encoding": "0",
+          "frame.coloring_rule.name": "UDP",
+          "frame.coloring_rule.string": "udp"
+        },
+        "eth": {
+          "eth.dst": "ff:ff:ff:ff:ff:ff",
+          "eth.dst_tree": {
+            "eth.dst_resolved": "Broadcast",
+            "eth.dst.oui": "16777215",
+            "eth.dst.lg": "1",
+            "eth.dst.ig": "1",
+            "eth.addr": "ff:ff:ff:ff:ff:ff",
+            "eth.addr_resolved": "Broadcast",
+            "eth.addr.oui": "16777215",
+            "eth.lg": "1",
+            "eth.ig": "1"
+          },
+          "eth.src": "00:15:5d:bd:8d:f8",
+          "eth.src_tree": {
+            "eth.src_resolved": "Microsoft_bd:8d:f8",
+            "eth.src.oui": "5469",
+            "eth.src.oui_resolved": "Microsoft Corporation",
+            "eth.src.lg": "0",
+            "eth.src.ig": "0",
+            "eth.addr": "00:15:5d:bd:8d:f8",
+            "eth.addr_resolved": "Microsoft_bd:8d:f8",
+            "eth.addr.oui": "5469",
+            "eth.addr.oui_resolved": "Microsoft Corporation",
+            "eth.lg": "0",
+            "eth.ig": "0"
+          },
+          "eth.type": "0x0800",
+          "eth.stream": "0"
+        },
+        "ip": {
+          "ip.version": "4",
+          "ip.hdr_len": "20",
+          "ip.dsfield": "0x00",
+          "ip.dsfield_tree": {
+            "ip.dsfield.dscp": "0",
+            "ip.dsfield.ecn": "0"
+          },
+          "ip.len": "105",
+          "ip.id": "0xe14d",
+          "ip.flags": "0x00",
+          "ip.flags_tree": {
+            "ip.flags.rb": "0",
+            "ip.flags.df": "0",
+            "ip.flags.mf": "0"
+          },
+          "ip.frag_offset": "0",
+          "ip.ttl": "128",
+          "ip.proto": "17",
+          "ip.checksum": "0x0000",
+          "ip.checksum.status": "2",
+          "ip.src": "172.30.128.1",
+          "ip.addr": "172.30.128.1",
+          "ip.src_host": "172.30.128.1",
+          "ip.host": "172.30.128.1",
+          "ip.dst": "172.30.143.255",
+          "ip.addr": "172.30.143.255",
+          "ip.dst_host": "172.30.143.255",
+          "ip.host": "172.30.143.255",
+          "ip.stream": "0"
+        },
+        "udp": {
+          "udp.srcport": "17500",
+          "udp.dstport": "17500",
+          "udp.port": "17500",
+          "udp.port": "17500",
+          "udp.length": "85",
+          "udp.checksum": "0x4262",
+          "udp.checksum.status": "2",
+          "udp.stream": "0",
+          "udp.stream.pnum": "4",
+          "Timestamps": {
+            "udp.time_relative": "108.722896500",
+            "udp.time_delta": "36.249357600"
+          },
+          "udp.payload": "7b:22:76:65:72:73:69:6f:6e:22:3a:5b:32:2c:30:5d:2c:22:70:6f:72:74:22:3a:31:37:35:30:30:2c:22:68:6f:73:74:5f:69:6e:74:22:3a:32:30:32:32:38:38:31:38:33:33:39:2c:22:6e:61:6d:65:73:70:61:63:65:73:22:3a:5b:37:32:34:31:34:32:38:35:5d:7d"
+        },
+        "db-lsp-disc": {
+          "json": {
+            "json.object": "{\"version\":[2,0],\"port\":17500,\"host_int\":20228818339,\"namespaces\":[72414285]}",
+            "json.object_tree": {
+              "json.member": "version",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/version/[]:2",
+                  "json.member_with_value": "[]:2",
+                  "json.value.number": "2",
+                  "json.path_with_value": "/version/[]:0",
+                  "json.member_with_value": "[]:0",
+                  "json.value.number": "0"
+                },
+                "json.key": "version",
+                "json.path": "/version"
+              },
+              "json.member": "port",
+              "json.member_tree": {
+                "json.path_with_value": "/port:17500",
+                "json.member_with_value": "port:17500",
+                "json.value.number": "17500",
+                "json.key": "port",
+                "json.path": "/port"
+              },
+              "json.member": "host_int",
+              "json.member_tree": {
+                "json.path_with_value": "/host_int:20228818339",
+                "json.member_with_value": "host_int:20228818339",
+                "json.value.number": "20228818339",
+                "json.key": "host_int",
+                "json.path": "/host_int"
+              },
+              "json.member": "namespaces",
+              "json.member_tree": {
+                "json.array": {
+                  "json.path_with_value": "/namespaces/[]:72414285",
+                  "json.member_with_value": "[]:72414285",
+                  "json.value.number": "72414285"
+                },
+                "json.key": "namespaces",
+                "json.path": "/namespaces"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]

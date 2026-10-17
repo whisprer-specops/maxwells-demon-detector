@@ -25,6 +25,29 @@ pub mod linktype {
     pub const LINUX_SLL2: u32 = 276;
 }
 
+/// Network layer of a decoded frame.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum L3 {
+    #[default]
+    Other,
+    Ip4,
+    Ip6,
+    Arp,
+}
+
+/// The header fields capture filters look at, filled in by [`Decoder::decode_full`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Summary {
+    pub l3: L3,
+    /// IP protocol number of the transport layer (6 TCP, 17 UDP, 1 ICMP, 58 ICMPv6 ...).
+    pub l4: Option<u8>,
+    pub src: Option<IpAddr>,
+    pub dst: Option<IpAddr>,
+    /// Ports (TCP, UDP and SCTP, first fragment only).
+    pub sport: Option<u16>,
+    pub dport: Option<u16>,
+}
+
 /// Decoder configuration.
 #[derive(Debug, Clone, Default)]
 pub struct Decoder {
@@ -37,31 +60,37 @@ pub struct Decoder {
 impl Decoder {
     /// Decode one frame. `wire_len` is the original on-the-wire length.
     pub fn decode(&self, lt: u32, data: &[u8], wire_len: usize) -> PacketEvent {
+        self.decode_full(lt, data, wire_len).0
+    }
+
+    /// Decode one frame, also returning the header [`Summary`] (used by capture filters).
+    pub fn decode_full(&self, lt: u32, data: &[u8], wire_len: usize) -> (PacketEvent, Summary) {
+        let mut sum = Summary::default();
         let mut ev = PacketEvent {
             len: wire_len.max(data.len()),
             proto: "other".to_string(),
             ..PacketEvent::default()
         };
         match lt {
-            linktype::ETHERNET => self.ethernet(data, &mut ev),
-            linktype::NULL | linktype::LOOP => self.null_loop(lt, data, &mut ev),
+            linktype::ETHERNET => self.ethernet(data, &mut ev, &mut sum),
+            linktype::NULL | linktype::LOOP => self.null_loop(lt, data, &mut ev, &mut sum),
             linktype::RAW_DLT | linktype::RAW_DLT_OPENBSD | linktype::RAW => {
-                self.ip_any(data, &mut ev)
+                self.ip_any(data, &mut ev, &mut sum)
             }
-            linktype::IPV4 => self.ipv4(data, &mut ev),
-            linktype::IPV6 => self.ipv6(data, &mut ev),
+            linktype::IPV4 => self.ipv4(data, &mut ev, &mut sum),
+            linktype::IPV6 => self.ipv6(data, &mut ev, &mut sum),
             linktype::LINUX_SLL if data.len() >= 16 => {
-                self.ethertype(be16(data, 14), &data[16..], &mut ev);
+                self.ethertype(be16(data, 14), &data[16..], &mut ev, &mut sum);
             }
             linktype::LINUX_SLL2 if data.len() >= 20 => {
-                self.ethertype(be16(data, 0), &data[20..], &mut ev);
+                self.ethertype(be16(data, 0), &data[20..], &mut ev, &mut sum);
             }
             _ => {}
         }
-        ev
+        (ev, sum)
     }
 
-    fn ethernet(&self, d: &[u8], ev: &mut PacketEvent) {
+    fn ethernet(&self, d: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         if d.len() < 14 {
             return;
         }
@@ -79,21 +108,24 @@ impl Decoder {
                 break;
             }
         }
-        self.ethertype(et, &d[off..], ev);
+        self.ethertype(et, &d[off..], ev, sum);
     }
 
-    fn ethertype(&self, et: u16, payload: &[u8], ev: &mut PacketEvent) {
+    fn ethertype(&self, et: u16, payload: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         match et {
-            0x0800 => self.ipv4(payload, ev),
-            0x86DD => self.ipv6(payload, ev),
-            0x0806 | 0x8035 => ev.proto = "arp".to_string(),
+            0x0800 => self.ipv4(payload, ev, sum),
+            0x86DD => self.ipv6(payload, ev, sum),
+            0x0806 | 0x8035 => {
+                sum.l3 = L3::Arp;
+                ev.proto = "arp".to_string();
+            }
             0x88CC => ev.proto = "lldp".to_string(),
             0x888E => ev.proto = "eapol".to_string(),
             _ => {}
         }
     }
 
-    fn null_loop(&self, lt: u32, d: &[u8], ev: &mut PacketEvent) {
+    fn null_loop(&self, lt: u32, d: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         if d.len() < 4 {
             return;
         }
@@ -112,21 +144,23 @@ impl Decoder {
         };
         let payload = &d[4..];
         match family {
-            2 => self.ipv4(payload, ev),
-            10 | 23 | 24 | 28 | 30 => self.ipv6(payload, ev),
-            _ => self.ip_any(payload, ev),
+            2 => self.ipv4(payload, ev, sum),
+            10 | 23 | 24 | 28 | 30 => self.ipv6(payload, ev, sum),
+            _ => self.ip_any(payload, ev, sum),
         }
     }
 
-    fn ip_any(&self, d: &[u8], ev: &mut PacketEvent) {
+    fn ip_any(&self, d: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         match d.first().map(|b| b >> 4) {
-            Some(4) => self.ipv4(d, ev),
-            Some(6) => self.ipv6(d, ev),
+            Some(4) => self.ipv4(d, ev, sum),
+            Some(6) => self.ipv6(d, ev, sum),
             _ => {}
         }
     }
 
-    fn set_addrs(&self, src: IpAddr, dst: IpAddr, ev: &mut PacketEvent) {
+    fn set_addrs(&self, src: IpAddr, dst: IpAddr, ev: &mut PacketEvent, sum: &mut Summary) {
+        sum.src = Some(src);
+        sum.dst = Some(dst);
         ev.dir = infer_dir(&src, &dst, &self.local).map(str::to_string);
         if self.keep_addrs {
             ev.src = Some(src.to_string());
@@ -134,7 +168,7 @@ impl Decoder {
         }
     }
 
-    fn ipv4(&self, d: &[u8], ev: &mut PacketEvent) {
+    fn ipv4(&self, d: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         if d.len() < 20 || d[0] >> 4 != 4 {
             return;
         }
@@ -142,9 +176,10 @@ impl Decoder {
         if ihl < 20 || d.len() < ihl {
             return;
         }
+        sum.l3 = L3::Ip4;
         let src = IpAddr::V4(Ipv4Addr::new(d[12], d[13], d[14], d[15]));
         let dst = IpAddr::V4(Ipv4Addr::new(d[16], d[17], d[18], d[19]));
-        self.set_addrs(src, dst, ev);
+        self.set_addrs(src, dst, ev, sum);
         let frag_offset = be16(d, 6) & 0x1FFF;
         let total = usize::from(be16(d, 2));
         // Trim link-layer padding using the IP total length when it is sane.
@@ -153,13 +188,14 @@ impl Decoder {
         } else {
             d.len()
         };
-        transport(d[9], &d[ihl..end], frag_offset == 0, ev);
+        transport(d[9], &d[ihl..end], frag_offset == 0, ev, sum);
     }
 
-    fn ipv6(&self, d: &[u8], ev: &mut PacketEvent) {
+    fn ipv6(&self, d: &[u8], ev: &mut PacketEvent, sum: &mut Summary) {
         if d.len() < 40 || d[0] >> 4 != 6 {
             return;
         }
+        sum.l3 = L3::Ip6;
         let mut s = [0u8; 16];
         let mut t = [0u8; 16];
         s.copy_from_slice(&d[8..24]);
@@ -168,6 +204,7 @@ impl Decoder {
             IpAddr::V6(Ipv6Addr::from(s)),
             IpAddr::V6(Ipv6Addr::from(t)),
             ev,
+            sum,
         );
 
         let plen = usize::from(be16(d, 4));
@@ -216,11 +253,12 @@ impl Decoder {
                 return;
             }
         }
-        transport(next, &d[off..end], first_fragment, ev);
+        transport(next, &d[off..end], first_fragment, ev, sum);
     }
 }
 
-fn transport(proto: u8, p: &[u8], has_header: bool, ev: &mut PacketEvent) {
+fn transport(proto: u8, p: &[u8], has_header: bool, ev: &mut PacketEvent, sum: &mut Summary) {
+    sum.l4 = Some(proto);
     let name: &str = match proto {
         6 => {
             if has_header && p.len() >= 4 {
@@ -264,6 +302,8 @@ fn transport(proto: u8, p: &[u8], has_header: bool, ev: &mut PacketEvent) {
         _ => "ip",
     };
     ev.proto = name.to_string();
+    sum.sport = ev.sport;
+    sum.dport = ev.dport;
 }
 
 fn guess_tcp(sport: Option<u16>, dport: Option<u16>, payload: &[u8]) -> &'static str {

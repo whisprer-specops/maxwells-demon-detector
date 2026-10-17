@@ -297,3 +297,131 @@ fn helpful_errors() {
     let e = run(&["--mode", "pcap-file", "--input", "definitely-missing.pcap"]).unwrap_err();
     assert!(e.contains("cannot open"), "{e}");
 }
+
+fn read_csv(path: &Path) -> (Vec<String>, Vec<Vec<String>>) {
+    let mut r = csv::Reader::from_path(path).expect("log file exists");
+    let header = r
+        .headers()
+        .expect("header row")
+        .iter()
+        .map(String::from)
+        .collect();
+    let rows = r
+        .records()
+        .map(|rec| rec.expect("valid row").iter().map(String::from).collect())
+        .collect();
+    (header, rows)
+}
+
+#[test]
+fn alert_and_metrics_logs_capture_the_demo() {
+    let dir = temp_dir("logs");
+    let alerts = dir.join("alerts.csv");
+    let metrics = dir.join("metrics.csv");
+    let out = headless(&[
+        "--frames",
+        "480",
+        "--alert-log",
+        alerts.to_str().expect("utf-8 temp path"),
+        "--metrics-log",
+        metrics.to_str().expect("utf-8 temp path"),
+    ]);
+
+    // Alert log: one row per alert, in time order, with the lane's numbers.
+    let (header, rows) = read_csv(&alerts);
+    assert_eq!(header, maxwells_demon_detector::logs::ALERT_HEADER);
+    assert!(!rows.is_empty(), "the demo raises alerts");
+    let col = |name: &str| header.iter().position(|h| h == name).expect("column");
+    let (t, lane, kind, glyph, msg) = (
+        col("t_s"),
+        col("lane"),
+        col("kind"),
+        col("glyph"),
+        col("message"),
+    );
+    assert!(rows.iter().all(|r| r.len() == header.len()));
+    assert!(rows.iter().all(|r| r[col("time_utc")].ends_with('Z')));
+    let times: Vec<f64> = rows.iter().map(|r| r[t].parse().expect("t_s")).collect();
+    assert!(times.windows(2).all(|w| w[0] <= w[1]), "rows in time order");
+    assert!(rows
+        .iter()
+        .any(|r| r[lane] == "DNS" && r[kind] == "demon" && r[glyph] == "@"));
+    for r in &rows {
+        assert!(
+            r[msg].starts_with(&r[glyph]),
+            "glyph matches message: {r:?}"
+        );
+    }
+    // Everything in the on-screen alert list is in the log too.
+    for (l, g) in alert_log(&out) {
+        assert!(
+            rows.iter().any(|r| r[lane] == l && r[glyph] == g),
+            "{l} {g} missing from the alert log"
+        );
+    }
+
+    // Metrics log: one row per lane per tick, lanes in screen order.
+    let (header, rows) = read_csv(&metrics);
+    assert_eq!(header, maxwells_demon_detector::logs::METRICS_HEADER);
+    assert_eq!(rows.len(), 480 * 8, "8 packet lanes x 480 ticks");
+    let col = |name: &str| header.iter().position(|h| h == name).expect("column");
+    let names = [
+        "ALL", "WEB", "DNS", "MAIL", "MEDIA", "CTRL", "BULK", "OTHER",
+    ];
+    for (i, r) in rows.iter().enumerate() {
+        assert_eq!(r[col("lane")], names[i % 8]);
+        assert_eq!(r[col("tick")], (i / 8 + 1).to_string());
+        if r[col("events")] == "0" {
+            assert_eq!(r[col("texture")], "idle");
+            assert_eq!(r[col("entropy")], "", "idle lanes have no statistics");
+        }
+    }
+    let dns = col("lane");
+    assert!(rows
+        .iter()
+        .any(|r| r[dns] == "DNS" && r[col("demon")] == "1"));
+    assert_eq!(rows[0][col("learning")], "1");
+    assert_eq!(rows[rows.len() - 1][col("learning")], "0");
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn logs_refuse_to_overwrite_inputs_or_each_other() {
+    let dir = temp_dir("clash");
+    let input = dir.join("events.csv");
+    std::fs::write(&input, "len\n100\n").expect("write input");
+    let input_s = input.to_str().expect("utf-8 temp path");
+    let run = |args: &[&str]| {
+        let mut argv = vec!["mdd", "--headless", "--fast"];
+        argv.extend_from_slice(args);
+        let cli = Cli::try_parse_from(argv).expect("valid arguments");
+        run_headless(&cli, &mut Vec::new()).map_err(|e| e.to_string())
+    };
+    let e = run(&[
+        "--mode",
+        "replay",
+        "--input",
+        input_s,
+        "--alert-log",
+        input_s,
+    ])
+    .unwrap_err();
+    assert!(e.contains("is the input file"), "{e}");
+    assert_eq!(
+        std::fs::read_to_string(&input).expect("input intact"),
+        "len\n100\n"
+    );
+    let same = dir.join("log.csv");
+    let same_s = same.to_str().expect("utf-8 temp path");
+    let e = run(&[
+        "--frames",
+        "8",
+        "--alert-log",
+        same_s,
+        "--metrics-log",
+        same_s,
+    ])
+    .unwrap_err();
+    assert!(e.contains("give each its own file"), "{e}");
+    std::fs::remove_dir_all(&dir).ok();
+}

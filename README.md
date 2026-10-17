@@ -2,7 +2,7 @@
 
 A realtime ASCII landscape of the **structure** flowing through a data stream: network packets, event logs, or the raw bytes of any file. Each lane of the stream scrolls past like an SDR waterfall turned on its side. Its height shows how busy the lane is, and its texture shows what kind of structure the data has: random, loosely patterned, rigidly ordered, one-note or metronomic. When order suddenly appears where there was none, a red `@` marks it.
 
-The program is `mdd`. It runs in a terminal on Windows, macOS and Linux, needs no capture driver for its demo, files or packet captures, and reads packet sizes, directions and timing only, never payloads.
+The program is `mdd`. It runs in a terminal on Windows, macOS and Linux, watches live network traffic or replays files and packet captures, and reads packet sizes, directions and timing only, never payloads.
 
 Copyright (C) 2026 whispr.dev. Maxwell's Demon Detector is free software under the GNU General Public License, version 3 only (`LICENSE`), with no warranty.
 
@@ -26,28 +26,30 @@ Then, in the folder you chose, `.\mdd.exe --help` on Windows, or `./mdd --help` 
 
 Run `mdd` with no options for the built-in 60-second demo: a voice call, a DNS tunnel, a beacon and an exfiltration burst, each flagged in its own lane. Press `q` to quit. On Windows, use Windows Terminal for colour and smooth updates.
 
+To watch live traffic, run `mdd --mode live-pcap`. On Windows, install [Npcap](https://npcap.com/#download) first (Wireshark installs it too) and use a terminal opened as Administrator. On macOS and Linux, nothing needs installing: run it with `sudo`. The full guide below has the details.
+
 ## The full guide
 
-[`v0.3.0/maxwells-demon-detector/README.md`](v0.3.0/maxwells-demon-detector/README.md) explains how to read the landscape, the demo, feeding it files, captures and live traffic, the event formats, how the statistics work, and their honest limits.
+[`crate/README.md`](crate/README.md) explains how to read the landscape, the demo, feeding it files, captures and live traffic, the event formats, how the statistics work, and their honest limits.
 
 ## Build it yourself
 
 Install Rust through [rustup](https://rustup.rs) and, on Windows, the Visual Studio C++ Build Tools. Then, in PowerShell:
 
 ```powershell
-cd .\v0.3.0\\maxwells-demon-detector
+cd .\crate
 cargo build --locked --release
 .\target\release\mdd.exe
 ```
 
-The first build downloads Rust 1.97.0, which `rust-toolchain.toml` pins. `scripts\check.ps1` runs every check (`bash scripts/check.sh` on Linux and macOS). Live capture needs Npcap or libpcap and `--features live`; the full guide has the steps.
+The first build downloads Rust 1.97.0, which `rust-toolchain.toml` pins. `scripts\check.ps1` runs every check (`bash scripts/check.sh` on Linux and macOS). Live capture is built in and needs nothing extra to build.
 
 ## What is where
 
 | Path | What it holds |
 | --- | --- |
-| `v0.3.0/maxwells-demon-detector/` | The Rust source, tests, examples and check scripts of the current release |
-| `v0.3.0/maxwells-demon-detector/CHANGELOG.md` | What changed in each version |
+| `crate/` | The Rust source, tests, examples and check scripts of the current release |
+| `crate/CHANGELOG.md` | What changed in each version |
 | `packaging/`, `.github/workflows/release.yml` | How releases are built, packed and published for Windows, macOS and Linux |
 
 ## Licence

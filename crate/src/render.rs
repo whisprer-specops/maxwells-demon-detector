@@ -31,6 +31,10 @@ pub struct View<'a> {
     pub show_legend: bool,
     pub recording: bool,
     pub record_error: Option<&'a str>,
+    /// An alert or metrics log is being written.
+    pub logging: bool,
+    /// A log stopped because a write failed.
+    pub log_error: Option<&'a str>,
     /// Show key hints (TUI only).
     pub hints: bool,
 }
@@ -219,6 +223,11 @@ fn draw_title(f: &mut Frame, app: &App, view: &View) {
         left.push_str(" | REC FAILED");
     } else if view.recording {
         left.push_str(" | REC");
+    }
+    if view.log_error.is_some() {
+        left.push_str(" | LOG FAILED");
+    } else if view.logging {
+        left.push_str(" | LOG");
     }
     let right = " spc:pause +/-:speed l:legend c:colour q:quit ";
     let w = f.w;
@@ -427,9 +436,11 @@ fn draw_alerts(f: &mut Frame, app: &App, lay: &Layout, view: &View) {
     }
     let mut y = lay.alerts_y;
     let end = lay.alerts_y + lay.alerts_rows;
-    if let Some(err) = view.record_error {
-        f.text(1, y, err, Style::bold(Tone::Red), f.w.saturating_sub(1));
-        y += 1;
+    for err in [view.record_error, view.log_error].into_iter().flatten() {
+        if y < end {
+            f.text(1, y, err, Style::bold(Tone::Red), f.w.saturating_sub(1));
+            y += 1;
+        }
     }
     if app.alerts.is_empty() && y < end {
         let hint = if app.warming_up() {
@@ -554,6 +565,8 @@ mod tests {
                     show_legend: legend,
                     recording: false,
                     record_error: None,
+                    logging: false,
+                    log_error: None,
                     hints: true,
                 };
                 let frame = render(&app, &view, w, h);

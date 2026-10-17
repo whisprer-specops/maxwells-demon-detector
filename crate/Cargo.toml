@@ -1,6 +1,6 @@
 [package]
 name = "maxwells-demon-detector"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 rust-version = "1.87"
 description = "Realtime ASCII landscape of structure (entropy, dependency, rhythm) flowing through data streams: packets, event logs, raw bytes"
@@ -17,8 +17,9 @@ path = "src/main.rs"
 
 [features]
 default = []
-# Live capture through libpcap (Linux) / Npcap (Windows). Needs native libs to build.
-live = ["dep:pcap"]
+# Live capture is always built in since 0.4.0 (Npcap or libpcap is loaded when live mode
+# starts). This empty feature only keeps older `--features live` build commands working.
+live = []
 
 [dependencies]
 clap = { version = "4.6", features = ["derive"] }
@@ -26,7 +27,9 @@ crossterm = "0.29"
 csv = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-pcap = { version = "2.5", optional = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
 
 [profile.release]
 codegen-units = 1

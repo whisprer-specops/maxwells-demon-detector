@@ -19,9 +19,9 @@ pub enum Mode {
     Bytes,
     /// A .pcap or .pcapng capture file (Wireshark, tcpdump, pktmon)
     PcapFile,
-    /// Live capture (build with --features live)
+    /// Live capture (needs Npcap on Windows; built in on Linux and macOS)
     LivePcap,
-    /// List capture interfaces and exit (build with --features live)
+    /// List capture interfaces and exit
     ListInterfaces,
 }
 
@@ -98,6 +98,14 @@ pub struct Cli {
     #[arg(long)]
     pub record: Option<PathBuf>,
 
+    /// Write every alert to this CSV file as it fires, with a timestamp and the lane's numbers
+    #[arg(long, value_name = "FILE")]
+    pub alert_log: Option<PathBuf>,
+
+    /// Write every lane's statistics to this CSV file once per tick (a time series to plot)
+    #[arg(long, value_name = "FILE")]
+    pub metrics_log: Option<PathBuf>,
+
     /// Seed for the demo traffic (same seed = same landscape)
     #[arg(long, default_value_t = 0xD3A1_0A5)]
     pub seed: u64,
@@ -126,15 +134,15 @@ pub struct Cli {
     #[arg(long, default_value_t = 36, value_parser = clap::value_parser!(u16).range(8..=500))]
     pub height: u16,
 
-    /// Live: interface name, description or index from --mode list-interfaces
+    /// Live: interface number from --mode list-interfaces, its name, or part of its description
     #[arg(long)]
     pub interface: Option<String>,
 
-    /// Live: BPF capture filter, e.g. "tcp or udp"
+    /// Live: capture filter in libpcap syntax, e.g. "udp port 53" or "tcp and not port 22"
     #[arg(long)]
     pub filter: Option<String>,
 
-    /// Live: promiscuous mode
+    /// Live: promiscuous mode (dropped automatically if the network card refuses it)
     #[arg(long, default_value_t = true, action = ArgAction::Set)]
     pub promisc: bool,
 
@@ -185,5 +193,15 @@ mod tests {
         let cli = Cli::parse_from(["mdd", "--promisc", "false", "--mode", "stdin-jsonl"]);
         assert!(!cli.promisc);
         assert_eq!(cli.mode, Mode::StdinJsonl);
+        assert!(cli.alert_log.is_none() && cli.metrics_log.is_none());
+        let cli = Cli::parse_from(["mdd", "--alert-log", "a.csv", "--metrics-log", "m.csv"]);
+        assert_eq!(
+            cli.alert_log.as_deref(),
+            Some(std::path::Path::new("a.csv"))
+        );
+        assert_eq!(
+            cli.metrics_log.as_deref(),
+            Some(std::path::Path::new("m.csv"))
+        );
     }
 }

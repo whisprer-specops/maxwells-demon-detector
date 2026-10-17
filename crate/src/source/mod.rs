@@ -15,7 +15,6 @@ use crate::Result;
 
 mod bytes;
 mod demo;
-#[cfg(feature = "live")]
 mod live;
 mod pcap;
 mod replay;
@@ -226,29 +225,13 @@ pub fn build(cli: &Cli) -> Result<Box<dyn Source>> {
     }
 }
 
-#[cfg(feature = "live")]
 fn build_live(cli: &Cli, keep_addrs: bool) -> Result<Box<dyn Source>> {
     Ok(Box::new(live::LiveSource::start(cli, keep_addrs)?))
 }
 
-#[cfg(not(feature = "live"))]
-fn build_live(_cli: &Cli, _keep_addrs: bool) -> Result<Box<dyn Source>> {
-    Err(NO_LIVE.into())
-}
-
-#[cfg(not(feature = "live"))]
-const NO_LIVE: &str = "this build has no live capture. Rebuild with:\n    cargo build --release --features live\n(needs libpcap-dev on Linux, or the Npcap runtime + SDK on Windows; see README).\nNo-install alternative: capture with Wireshark/tcpdump/pktmon and use --mode pcap-file";
-
-/// Print capture interfaces (live builds only).
+/// Print the capture interfaces and which capture backend is in use.
 pub fn print_interfaces() -> Result<()> {
-    #[cfg(feature = "live")]
-    {
-        live::print_interfaces()
-    }
-    #[cfg(not(feature = "live"))]
-    {
-        Err(NO_LIVE.into())
-    }
+    live::print_interfaces()
 }
 
 #[cfg(test)]

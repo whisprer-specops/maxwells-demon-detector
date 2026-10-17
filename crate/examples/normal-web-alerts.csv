@@ -1,0 +1,23 @@
+time_utc,t_s,tick,lane,kind,glyph,events,entropy,entropy_rate,dep_z,kl,message
+2026-10-17T09:34:49.273Z,47.262,378,ALL,burst,^,393,2.419,1.219,62.72,1.061,^ burst: 393 events in one tick (typical ~52.1)
+2026-10-17T09:34:49.273Z,47.262,378,WEB,burst,^,393,2.419,1.212,53.22,1.060,^ burst: 393 events in one tick (typical ~52.1)
+2026-10-17T09:34:58.893Z,56.883,455,ALL,shift,!,179,2.535,1.769,27.91,1.532,! mix shifted: KL 1.53 bits away from baseline
+2026-10-17T09:34:58.893Z,56.883,455,WEB,shift,!,179,2.535,1.794,21.40,1.532,! mix shifted: KL 1.53 bits away from baseline
+2026-10-17T09:35:19.023Z,77.013,616,ALL,burst,^,232,2.623,1.557,40.66,1.414,^ burst: 232 events in one tick (typical ~39.8)
+2026-10-17T09:35:19.023Z,77.013,616,WEB,burst,^,232,2.623,1.565,39.42,1.414,^ burst: 232 events in one tick (typical ~39.8)
+2026-10-17T09:35:19.148Z,77.137,617,ALL,shift,!,246,2.498,1.440,32.45,1.400,! mix shifted: KL 1.40 bits away from baseline
+2026-10-17T09:35:19.148Z,77.137,617,WEB,shift,!,246,2.498,1.420,53.08,1.399,! mix shifted: KL 1.40 bits away from baseline
+2026-10-17T09:35:29.388Z,87.378,699,ALL,burst,^,175,2.699,1.983,17.83,0.783,^ burst: 175 events in one tick (typical ~38.0)
+2026-10-17T09:35:29.388Z,87.378,699,WEB,burst,^,175,2.699,1.975,31.42,0.783,^ burst: 175 events in one tick (typical ~38.0)
+2026-10-17T09:35:29.649Z,87.639,701,ALL,shift,!,49,2.677,1.674,33.21,0.986,! mix shifted: KL 0.99 bits away from baseline
+2026-10-17T09:35:29.649Z,87.639,701,WEB,shift,!,49,2.677,1.670,36.98,0.986,! mix shifted: KL 0.99 bits away from baseline
+2026-10-17T09:35:49.389Z,107.379,859,ALL,burst,^,133,2.877,2.230,18.06,0.513,^ burst: 133 events in one tick (typical ~38.3)
+2026-10-17T09:35:49.389Z,107.379,859,WEB,burst,^,133,2.877,2.233,21.68,0.513,^ burst: 133 events in one tick (typical ~38.1)
+2026-10-17T09:35:49.637Z,107.627,861,ALL,shift,!,97,2.749,1.567,60.94,1.336,! mix shifted: KL 1.34 bits away from baseline
+2026-10-17T09:35:49.637Z,107.627,861,WEB,shift,!,97,2.749,1.583,30.74,1.336,! mix shifted: KL 1.34 bits away from baseline
+2026-10-17T09:37:28.921Z,206.911,1655,ALL,burst,^,177,2.347,1.903,22.44,0.270,^ burst: 177 events in one tick (typical ~48.0)
+2026-10-17T09:37:28.921Z,206.911,1655,WEB,burst,^,177,2.347,1.892,15.59,0.270,^ burst: 177 events in one tick (typical ~48.0)
+2026-10-17T09:37:29.649Z,207.638,1661,ALL,demon,@,8,1.868,1.003,76.58,0.520,@ order appeared: entropy rate 1.87 -> 1.25 bits/sym (dep z 76.6)
+2026-10-17T09:37:29.649Z,207.638,1661,WEB,demon,@,8,1.868,1.004,73.11,0.520,@ order appeared: entropy rate 1.86 -> 1.26 bits/sym (dep z 73.1)
+2026-10-17T09:39:02.020Z,300.010,2400,ALL,burst,^,145,2.238,1.546,34.32,0.320,^ burst: 145 events in one tick (typical ~50.6)
+2026-10-17T09:39:02.020Z,300.010,2400,WEB,burst,^,145,2.238,1.543,24.72,0.320,^ burst: 145 events in one tick (typical ~50.6)

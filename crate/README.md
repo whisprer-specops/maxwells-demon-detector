@@ -1,4 +1,4 @@
-# Maxwell's Demon Detector (`mdd`) v0.3.1
+# Maxwell's Demon Detector (`mdd`) v0.4.0
 
 Copyright (C) 2026 whispr.dev. Free software under the GNU General Public License, version 3 only (GPL-3.0-only), with no warranty. The full terms are in the repository's `LICENSE`.
 
@@ -55,7 +55,7 @@ the repository's top-level README says how to install them. To build it yourself
 1. Install Rust from <https://rustup.rs> (run `rustup-init.exe`; let it install the
    Visual Studio C++ Build Tools when it asks). The first build downloads Rust 1.97.0,
    which `rust-toolchain.toml` pins; the code keeps to Rust 1.87, the declared minimum.
-2. Unzip this folder and open PowerShell in it (`maxwells-demon-detector`).
+2. Open PowerShell in this folder (`crate` in the repository).
 3. Run the demo:
 
    ```powershell
@@ -185,52 +185,130 @@ it can convert to `.pcapng` for `mdd`. It needs an **Administrator** PowerShell.
    .\target\release\mdd.exe --mode pcap-file --input C:\temp\cap.pcapng --speed 2
    ```
 
-## Live capture (optional build)
+## Live capture
 
-Picture first: the default build needs no capture driver at all. Live capture uses
-**Npcap** on Windows (the driver Wireshark installs) or **libpcap** on Linux, and has
-to be switched on when building with `--features live`.
+Picture first: live capture watches one network card while traffic flows through it.
+It is part of every copy of `mdd`, the ready-built downloads included. What it needs
+depends on the system:
+
+| System | Needs | Permission |
+|--------|-------|------------|
+| Windows | **Npcap**, the capture driver Wireshark installs | an Administrator terminal |
+| macOS | nothing: libpcap comes with macOS | `sudo` |
+| Linux | nothing: libpcap if it can be loaded, otherwise the built-in capture | `sudo`, or `setcap` once |
+
+Commands below use `.\target\release\mdd.exe` (or `./target/release/mdd`), the program
+you built. With a ready-built download, run `.\mdd.exe` (or `./mdd`) in the folder you
+installed it to instead.
 
 **Windows**
 
-1. Download the Npcap installer from <https://npcap.com/#download> and run it. On the
-   options page, tick **"Install Npcap in WinPcap API-compatible Mode"**.
-2. From the same download page, get the **Npcap SDK** zip and extract it to
-   `C:\npcap-sdk` (so that `C:\npcap-sdk\Lib\x64\wpcap.lib` exists).
-3. In PowerShell, in this project folder, tell the build where the SDK is (this lasts
-   for the current window only):
-   ```powershell
-   $env:LIBPCAP_LIBDIR = "C:\npcap-sdk\Lib\x64"
-   ```
-4. Build with live capture:
-   ```powershell
-   cargo build --release --features live
-   ```
-5. List interfaces; note the number in `[ ]` of the one you want:
+1. If Wireshark is installed, Npcap already is: go to step 2. Otherwise download the
+   Npcap installer from <https://npcap.com/#download> and run it with its default options.
+2. Open Windows Terminal as Administrator: right-click the Start button, then
+   **Terminal (Admin)**, then **Yes**.
+3. List the interfaces:
    ```powershell
    .\target\release\mdd.exe --mode list-interfaces
    ```
-6. Capture live (replace `3` with your number; the filter is optional BPF syntax):
+   The one marked `default` is used when you don't name one. Its first line says which
+   Npcap version is in use.
+4. Capture on the default interface, or name one by its number or part of its description:
    ```powershell
+   .\target\release\mdd.exe --mode live-pcap
    .\target\release\mdd.exe --mode live-pcap --interface 3
-   .\target\release\mdd.exe --mode live-pcap --interface 3 --filter "udp port 53"
+   .\target\release\mdd.exe --mode live-pcap --interface wi-fi --filter "udp port 53"
    ```
 
-If step 5 fails with *wpcap.dll was not found*: the compatible-mode box in step 1
-was not ticked. Re-run the Npcap installer and tick it (or add
-`C:\Windows\System32\Npcap` to your PATH). If step 6 opens but shows nothing, run
-PowerShell as Administrator (Npcap may be set to admin-only).
+If `mdd` says Npcap isn't installed, do step 1. If it says it has no permission, do
+step 2 (or reinstall Npcap with "Restrict Npcap driver's access to Administrators only"
+unticked, and any terminal will do). If the title ends with
+`own traffic: promiscuous mode refused`, the network card (usually Wi-Fi) won't show
+other machines' traffic, so `mdd` is watching this machine's own.
 
 **Linux (Lubuntu / DragonOS)**
 
 ```bash
-sudo apt install libpcap-dev
-cargo build --release --features live
 sudo ./target/release/mdd --mode list-interfaces
 sudo ./target/release/mdd --mode live-pcap --interface eth0
-# or, instead of sudo each time:
-sudo setcap cap_net_raw,cap_net_admin=eip target/release/mdd
+# or allow capture once, then run it without sudo:
+sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/mdd
 ```
+
+The first line of `--mode list-interfaces` says which capture is in use. A program built
+here uses libpcap when it is installed (`sudo apt install libpcap0.8`), with libpcap's full
+filter language. The ready-built Linux downloads are fully static, so they run on any
+distribution but can't load libpcap; they use the built-in capture instead. Its
+`--filter` understands the common forms, with libpcap's meaning:
+
+```text
+tcp  udp  icmp  icmp6  arp  ip  ip6
+[tcp|udp] [src|dst] port N          [tcp|udp] [src|dst] portrange N-M
+[src|dst] host ADDRESS              [src|dst] net ADDRESS/BITS
+not ...   ... and ...   ... or ...   ( ... )      (also ! && ||)
+```
+
+Anything else is refused with that list, never silently read differently. As in
+tcpdump, `and` and `or` have equal precedence and group left to right, so use brackets:
+`udp or (tcp and port 80)`. `MDD_CAPTURE=builtin` or `MDD_CAPTURE=libpcap` in front of
+the command picks a capture by hand.
+
+**macOS**
+
+```bash
+sudo ./target/release/mdd --mode list-interfaces
+sudo ./target/release/mdd --mode live-pcap --interface en0
+```
+
+Filters use libpcap's language everywhere except the built-in Linux capture:
+`"udp port 53"`, `"tcp and not port 22"`, `"host 192.168.1.10"`, `"net 10.0.0.0/8"`.
+
+## Logging alerts and metrics to CSV
+
+Two optional logs turn a session into data you can graph. Both work in every mode
+(live, files, demo, headless) and can run together.
+
+```powershell
+.\target\release\mdd.exe --mode live-pcap --interface 3 --alert-log C:\temp\alerts.csv --metrics-log C:\temp\metrics.csv
+```
+
+**`--alert-log FILE`** writes one row per alert, the tick it fires. Every alert is
+kept, even after it scrolls off the screen.
+
+```text
+time_utc,t_s,tick,lane,kind,glyph,events,entropy,entropy_rate,dep_z,kl,message
+2026-10-17T09:14:03.125Z,16.500,132,DNS,demon,@,26,1.177,0.353,97.96,1.896,@ order appeared: ...
+```
+
+**`--metrics-log FILE`** writes one row per lane per tick: every lane's numbers as a
+continuous time series, including the build-up before an alert. At the default
+125 ms tick that is 8 rows per lane per second, roughly 20 MB an hour for the 8
+packet lanes. A slower tick (`--tick-ms 1000`) cuts that to about 3 MB.
+
+| Column | Meaning |
+|--------|---------|
+| `time_utc` | wall-clock time the tick closed (ISO 8601, UTC, milliseconds) |
+| `t_s`, `tick` | session clock in seconds, and the tick number |
+| `lane` | `ALL WEB DNS MAIL MEDIA CTRL BULK OTHER`, or the bytes lanes |
+| `events`, `bytes` | volume this tick |
+| `height` | column height drawn, 0 to 1 |
+| `texture` | `idle sparse noise flow order mono` |
+| `entropy` | how mixed the lane's symbols are, in bits (0 to 4) |
+| `top_share` | share of the most common symbol |
+| `dep_z` | order score: lag-1 dependency against shuffled copies (5 or more is strong) |
+| `rho` | share of the uncertainty the previous symbol removes |
+| `entropy_rate` | entropy left once order is accounted for; the demon detector watches it fall |
+| `kl` | how far the mix is from this lane's baseline, in bits (last computed) |
+| `rhythm_ms`, `rhythm_cv` | repeat period and its spread, when timing is regular enough to measure |
+| `rhythm`, `burst`, `shift`, `demon` | detector flags, 1 when on |
+| `learning` | 1 while detectors are still learning what normal looks like |
+
+A lane with no events in a tick gets blank statistics: there was nothing to measure.
+Rows are flushed every tick, so Ctrl+C or a crash loses at most the tick in progress.
+If a write fails (disk full, say), that log stops, the title shows `LOG FAILED`, and
+the session carries on. A log file is never allowed to be the input file or another
+output file. With `--headless --fast`, use `t_s` rather than `time_utc`: the session
+clock runs far ahead of the wall clock.
 
 ## Event file formats (replay and stdin)
 
@@ -285,30 +363,31 @@ of data for fast lanes such as raw bytes. The title shows `learning` meanwhile.
   or by filtering the capture first.
 * In capture files, "us" (for in/out) means private addresses (10.x, 192.168.x, ...).
   Live capture uses the interface's own addresses.
-* 47 tests, clippy clean with and without `--features live` on Linux. Every release
-  is built and fully checked on Windows, Linux and macOS by GitHub Actions before it
-  is published. The crate has no Windows-specific code of its own; the
-  Windows-specific parts are the widely used `crossterm` (terminal) and `pcap`
-  (Npcap binding) crates. The ready-built downloads leave out live capture; build
-  with `--features live` for it.
+* 65 tests, clippy clean. Every release is built and fully checked on Windows, Linux
+  and macOS by GitHub Actions before it is published. The crate's own system-specific
+  code is the Npcap and libpcap loader (`src/capture/libpcap.rs`) and the built-in Linux
+  capture (`src/capture/linux.rs`). Live capture itself is tested on Linux, with both
+  captures; GitHub's Windows machines have no Npcap, so there the tests check the
+  "Npcap missing" path, and live capture on Windows is checked by hand.
 
 ## Development
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1   # every check below, a release build and the demo
-cargo test                                   # 40 unit, 5 end-to-end and 2 copyright-notice tests
+cargo test                                   # 56 unit, 7 end-to-end and 2 copyright-notice tests
 cargo clippy --all-targets -- -D warnings
-cargo clippy --all-targets --features live -- -D warnings   # needs the Npcap SDK / libpcap-dev
 ```
 
 | File | Role |
 |------|------|
 | `src/source/*` | demo script, CSV/JSONL replay, stdin, raw bytes, pcap files, live capture |
+| `src/capture/*` | Npcap / libpcap loaded at run time, the built-in Linux capture and its filter (the only unsafe code) |
 | `src/pcapfile.rs`, `src/decode.rs` | pure-Rust pcap/pcapng reader and packet decoder (no libpcap needed) |
 | `src/event.rs` | lanes and symbols |
 | `src/analysis.rs` | statistics, classification, detectors |
 | `src/app.rs` | scrolling history, heights, alerts |
 | `src/render.rs`, `src/screen.rs` | layout and glyphs; flicker-free diff presenter |
+| `src/logs.rs` | optional CSV logs: alerts as they fire, lane metrics every tick |
 | `src/run.rs` | TUI loop (keys, pause, resize, terminal restore) and headless mode |
 | `tests/landscape.rs` | end-to-end checks that the right glyphs land in the right lanes |
 | `tests/notice_contracts.rs` | every code file opens with the copyright and SPDX lines |

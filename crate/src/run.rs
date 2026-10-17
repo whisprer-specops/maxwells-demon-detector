@@ -4,6 +4,7 @@
 //! Run loops: the interactive TUI and headless text frames.
 
 use std::io::{self, IsTerminal, Write};
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyModifiers};
@@ -11,6 +12,7 @@ use crossterm::{cursor, execute, style, terminal};
 
 use crate::app::App;
 use crate::cli::{Cli, Mode};
+use crate::logs::Logs;
 use crate::render::{render, View};
 use crate::screen::Screen;
 use crate::source::{self, Recorder, Sink, Source};
@@ -32,10 +34,55 @@ pub fn run(cli: &Cli) -> Result<()> {
     run_tui(cli)
 }
 
-fn make_parts(cli: &Cli) -> Result<(Box<dyn Source>, Sink, App)> {
+/// Two paths name the same file (also when spelt differently, if it already exists).
+fn same_file(a: &Path, b: &Path) -> bool {
+    if a == b {
+        return true;
+    }
+    match (a.canonicalize(), b.canonicalize()) {
+        (Ok(x), Ok(y)) => x == y,
+        _ => false,
+    }
+}
+
+/// Refuse output files that would overwrite the input or each other.
+fn check_outputs(cli: &Cli) -> Result<()> {
+    let outputs: Vec<(&str, &PathBuf)> = [
+        ("--record", cli.record.as_ref()),
+        ("--alert-log", cli.alert_log.as_ref()),
+        ("--metrics-log", cli.metrics_log.as_ref()),
+    ]
+    .into_iter()
+    .filter_map(|(flag, p)| p.map(|p| (flag, p)))
+    .collect();
+    for (i, (flag, path)) in outputs.iter().enumerate() {
+        if let Some(input) = &cli.input {
+            if same_file(path, input) {
+                return Err(format!(
+                    "{flag} {} is the input file; pick another name so it isn't overwritten",
+                    path.display()
+                )
+                .into());
+            }
+        }
+        for (other, other_path) in &outputs[i + 1..] {
+            if same_file(path, other_path) {
+                return Err(format!(
+                    "{flag} and {other} both name {}; give each its own file",
+                    path.display()
+                )
+                .into());
+            }
+        }
+    }
+    Ok(())
+}
+
+fn make_parts(cli: &Cli) -> Result<(Box<dyn Source>, Sink, App, Logs)> {
     if cli.record.is_some() && cli.mode == Mode::Bytes {
         return Err("--record captures packet events; it doesn't apply to --mode bytes".into());
     }
+    check_outputs(cli)?;
     // Open the input first so a bad --input never leaves an empty recording behind.
     let src = source::build(cli)?;
     let recorder = match &cli.record {
@@ -49,7 +96,8 @@ fn make_parts(cli: &Cli) -> Result<(Box<dyn Source>, Sink, App)> {
         cli.window as usize,
         cli.max_alerts,
     );
-    Ok((src, Sink::new(recorder), app))
+    let logs = Logs::create(cli.alert_log.as_deref(), cli.metrics_log.as_deref())?;
+    Ok((src, Sink::new(recorder), app, logs))
 }
 
 /// Headless mode: advance the clock tick by tick and print frames as plain text.
@@ -57,7 +105,7 @@ fn make_parts(cli: &Cli) -> Result<(Box<dyn Source>, Sink, App)> {
 /// With `--fast` the virtual clock jumps a whole tick per step (no sleeping), so a
 /// minute of demo renders in well under a second: ideal for tests and screenshots.
 pub fn run_headless<W: Write>(cli: &Cli, out: &mut W) -> Result<()> {
-    let (mut src, mut sink, mut app) = make_parts(cli)?;
+    let (mut src, mut sink, mut app, mut logs) = make_parts(cli)?;
     if cli.fast && src.realtime() {
         return Err(
             "--fast needs demo or file input (stdin and live capture run in real time)".into(),
@@ -92,6 +140,7 @@ pub fn run_headless<W: Write>(cli: &Cli, out: &mut W) -> Result<()> {
             app.ingest(&o);
         }
         app.finish_tick(vclock.as_secs_f64());
+        logs.tick(&app, vclock.as_secs_f64());
         ticks += 1;
 
         let status = src.status();
@@ -109,6 +158,8 @@ pub fn run_headless<W: Write>(cli: &Cli, out: &mut W) -> Result<()> {
                 show_legend: true,
                 recording: sink.recording(),
                 record_error: sink.record_error.as_deref(),
+                logging: logs.active(),
+                log_error: logs.error.as_deref(),
                 hints: false,
             };
             let frame = render(&app, &view, cli.width, cli.height);
@@ -136,7 +187,11 @@ pub fn run_headless<W: Write>(cli: &Cli, out: &mut W) -> Result<()> {
             )?;
         }
     }
+    if let Some(err) = &logs.error {
+        writeln!(out, "{err}")?;
+    }
     sink.flush()?;
+    logs.flush()?;
     Ok(())
 }
 
@@ -184,7 +239,7 @@ fn run_tui(cli: &Cli) -> Result<()> {
     if !io::stdout().is_terminal() {
         return Err("stdout is not a terminal. Run mdd in a terminal window, or add --headless to print frames as text".into());
     }
-    let (mut src, mut sink, mut app) = make_parts(cli)?;
+    let (mut src, mut sink, mut app, mut logs) = make_parts(cli)?;
     let no_color_env = std::env::var_os("NO_COLOR").is_some_and(|v| !v.is_empty());
     let mut screen = Screen::new(!cli.no_color && !no_color_env);
 
@@ -194,10 +249,21 @@ fn run_tui(cli: &Cli) -> Result<()> {
         default_hook(info);
     }));
     let guard = TerminalGuard::enter()?;
-    let result = tui_loop(cli, src.as_mut(), &mut sink, &mut app, &mut screen);
+    let result = tui_loop(
+        cli,
+        src.as_mut(),
+        &mut sink,
+        &mut app,
+        &mut logs,
+        &mut screen,
+    );
     drop(guard);
     let _ = std::panic::take_hook(); // back to the default hook
     sink.flush()?;
+    logs.flush()?;
+    if let Some(err) = &logs.error {
+        eprintln!("mdd: {err}");
+    }
     result
 }
 
@@ -206,6 +272,7 @@ fn tui_loop(
     src: &mut dyn Source,
     sink: &mut Sink,
     app: &mut App,
+    logs: &mut Logs,
     screen: &mut Screen,
 ) -> Result<()> {
     let mut out = io::stdout();
@@ -287,6 +354,7 @@ fn tui_loop(
         if now >= next_tick {
             if running {
                 app.finish_tick(vclock.as_secs_f64());
+                logs.tick(app, vclock.as_secs_f64());
                 if !paused {
                     redraw = true;
                 }
@@ -308,6 +376,8 @@ fn tui_loop(
                 show_legend,
                 recording: sink.recording(),
                 record_error: sink.record_error.as_deref(),
+                logging: logs.active(),
+                log_error: logs.error.as_deref(),
                 hints: true,
             };
             let frame = render(app, &view, w, h);

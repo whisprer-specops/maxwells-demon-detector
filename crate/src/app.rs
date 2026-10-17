@@ -38,6 +38,8 @@ pub struct App {
     pub history: Vec<VecDeque<Col>>,
     pub cols: VecDeque<ColMeta>,
     pub alerts: VecDeque<Alert>,
+    /// Alerts raised by the most recent tick, oldest first (for the alert log).
+    pub new_alerts: Vec<Alert>,
     pub max_alerts: usize,
     pub ticks: u64,
     pub total_events: u64,
@@ -74,6 +76,7 @@ impl App {
             history,
             cols: VecDeque::with_capacity(HISTORY),
             alerts: VecDeque::new(),
+            new_alerts: Vec::new(),
             max_alerts: max_alerts.max(1),
             ticks: 0,
             total_events: 0,
@@ -112,6 +115,7 @@ impl App {
         self.last_t = t;
         let id = self.ticks;
         self.ticks += 1;
+        self.new_alerts.clear();
 
         let mut cols: Vec<Col> = Vec::with_capacity(self.lanes.len());
         let mut all_mean_dt = None;
@@ -124,12 +128,14 @@ impl App {
                 all_mean_dt = (m > 0.0).then_some(m);
             }
             for a in self.scratch_alerts.drain(..) {
-                self.alerts.push_front(Alert {
+                let alert = Alert {
                     t,
                     lane: lane.spec.name,
                     kind: a.kind,
                     msg: a.msg,
-                });
+                };
+                self.new_alerts.push(alert.clone());
+                self.alerts.push_front(alert);
             }
             cols.push(col);
         }
