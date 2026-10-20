@@ -6,6 +6,8 @@ The program is `mdd`. It runs in a terminal on Windows, macOS and Linux, watches
 
 Copyright (C) 2026 whispr.dev. Maxwell's Demon Detector is free software under the GNU General Public License, version 3 only (`LICENSE`), with no warranty.
 
+**New here?** Start with the [quickstart guide](docs/quickstart/QUICKSTART.md): a plain-English tour with pictures, from installing to your first results. It's also a [PDF](docs/quickstart/maxwells-demon-detector-quickstart.pdf) to keep or print.
+
 ## Download
 
 Ready-built programs for Windows, macOS and Linux are on the [Releases page](https://github.com/whisprer-specops/maxwells-demon-detector/releases/latest). These links always give the newest release:
